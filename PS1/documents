@@ -20,11 +20,12 @@
    "source": [
     "* [1. Introduction](#Introduction)\n",
     "* [2. Exploratory Data Analysis](#ExploratoryDataAnalysis)\n",
-    "    * [2.1 Data Cleaning](#DataCleaning)\n",
-    "    * [2.2 Feature Selection](#FeatureSelection)\n",
-    "        * [2.2.1 Correlation Of Feature](#CorrelationOfFeature)\n",
-    "        * [2.2.2 Univariate Selection](#UnivariateSelection)\n",
-    "        * [2.2.3 Feature Importance](#FeatureImportance)\n",
+    "    * [2.1 Bla](#Bla)\n",
+    "    * [2.1 Blu](#Blu)\n",
+    "    * [2.1 Feature Selection](#FeatureSelection)\n",
+    "        * [2.1.1 Correlation Of Feature](#CorrelationOfFeature)\n",
+    "        * [2.1.1 Univariate Selection](#UnivariateSelection)\n",
+    "        * [2.1.1 Feature Importance](#FeatureImportance)\n",
     "* [3. Conclusion](#Conclusion)\n",
     "        \n",
     "    \n"
@@ -34,9 +35,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## 1. Introduction <a class=\"anchor\" id=\"Introduction\"></a>\n",
-    "\n",
-    "We deal with client profiles related data, from a famous telecom compagny. We perform an exploratory data analysis to help out our friend hired in the marketing department of the firm. We are interested in the lifetime value of loyal customers."
+    "## 1. Introduction <a class=\"anchor\" id=\"Introduction\"></a>"
    ]
   },
   {
@@ -50,20 +49,21 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "**2.1 Data cleaning** <a class=\"anchor\" id=\"Data cleaning\"></a>\n",
-    "\n",
-    "In the framework of the data type analysis of each feature, we figure out that while we do not have NaN values, we do have empty cells in the TotalCharges feature. \n",
-    "\n",
-    "As a result, we perform a replacement of cells consisting of one space, by NaN values, which we then filter out from data. We thus remove 11 rows with missing data.\n",
-    "\n",
-    "As we focus on lifetime value of loyal customers, we do not consider those who leave the firm."
+    "**2.1 Bla** <a class=\"anchor\" id=\"Bla\"></a>"
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "**2.2 Feature Selection** <a class=\"anchor\" id=\"FeatureSelection\"></a>\n",
+    "**2.1 Blu** <a class=\"anchor\" id=\"Blu\"></a>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**2.1 Feature Selection** <a class=\"anchor\" id=\"FeatureSelection\"></a>\n",
     "\n",
     "**Before starting the feature selection per se, we do a little of feature engineering**:\n",
     "- **Create a new variable 'MonthlyExpense' = 'TotalCharges'/'tenure'**: As we are intrested in the lifetime value of the contracts, we can compute the average monthly expense of each customer, then the lifetime value of the contracts could be extrapolate from the average lifetime of the contracts. Therefore the feature selection will consist in identifying which features have the most explanatory power regarding this new feature 'MonthlyExpense'. As we already suspect, by construction, some features such as 'TotalCharges', 'tenure' and 'MonthlyCharges' will certainly be highly correlated with 'MonthlyExpense' and could be discarded in the subsequent feature importance analysis in order to obtain a better resolution of the other features contribution to our dependent variable.\n",
@@ -74,7 +74,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "***2.2.1 Correlation Of Feature*** <a class=\"anchor\" id=\"CorrelationOfFeature\"></a>\n",
+    "***2.1.1 Correlation Of Feature*** <a class=\"anchor\" id=\"CorrelationOfFeature\"></a>\n",
     "\n",
     "As mentioned before, by construction, we already expected a high correlation with 'TotalCharges' and 'MonthlyCharges'. Without taking them into account, the highest correlated features with 'MonthlyExpense' are:\n",
     "- 'Fiber'\n",
@@ -87,7 +87,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "***2.2.2 Univariate Selection*** <a class=\"anchor\" id=\"UnivariateSelection\"></a>\n",
+    "***2.1.1 Univariate Selection*** <a class=\"anchor\" id=\"UnivariateSelection\"></a>\n",
     "\n",
     "We perform a serie of univariate regression of the dependent variable ('MonthlyExpense') on each individual feature to observe the individual effect of each of them. \n",
     "\n",
@@ -105,7 +105,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "***2.2.3 Feature Importance*** <a class=\"anchor\" id=\"FeatureImportance\"></a>\n",
+    "***2.1.1 Feature Importance*** <a class=\"anchor\" id=\"FeatureImportance\"></a>\n",
     "\n",
     "Feature importance gives a score for each feature of your data based on an inbuilt class that comes with Tree Based Classifiers, the higher the score more important or relevant is the feature towards the output variable.\n",
     "once again the top five is given by:\n",
@@ -121,18 +121,12 @@
    "source": [
     "## 3. Conclusion <a class=\"anchor\" id=\"Conclusion\"></a>\n",
     "\n",
-    "'Fiber', 'Internet', 'StreamingMovies' and 'StreamingTV' probably play a determinant role in the explanation of the  'MonthlyExpense' and a fortiori of the lifetime value of the contracts.\n",
-    "\n",
-    "On the aggregate, data is clean. However, data types had to be specified. \n",
-    "\n",
-    "As the main cashflow drivers of a telecom compagny are centered around their data plans, we understand that what drives a client's MonthlyExpsenses are the four services mentioned above. Additional services like OnlineBackup and OnlineSecurity, do not seem to drive the MonthlyExpenses.\n",
-    "\n",
-    "From our heatmap, we had figured out that clients' profiles and therefore consumption, does not seem to be correlated with age or sex. One might be interested in varying the advertising strategy to see whether we can introduce a bias in the data, ceteris paribus.\n"
+    "'Fiber', 'Internet', 'StreamingMovies' and 'StreamingTV' probably play a determinant role in the explanation of the  'MonthlyExpense' and a fortiori of the lifetime value of the contracts.\n"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 1,
+   "execution_count": 6,
    "metadata": {},
    "outputs": [
     {
@@ -141,7 +135,7 @@
        "0"
       ]
      },
-     "execution_count": 1,
+     "execution_count": 6,
      "metadata": {},
      "output_type": "execute_result"
     }
