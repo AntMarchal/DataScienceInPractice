@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn as sk
+import seaborn as sns
 
 ############################################### Data Loading ###########################################################
 
@@ -33,6 +34,13 @@ data.drop(columns = NaN_feature, inplace=True)
 data.dropna(axis=0,how='any',inplace=True)
 
 data.isnull().sum().sum()
+################################################# EDA ##################################################################
+
+
+plt.pie(y.value_counts(),autopct='%1.1f%%')
+plt.legend(['Home','Away','Draw'])
+plt.title('Class repartition')
+plt.show()
 
 
 ############################################### Feature engineering ####################################################
@@ -137,18 +145,37 @@ for i in range(1,data.shape[0]):
 
 # Drop Nan that comes from lack of data in momentum
 data.dropna(axis=0, how='any',inplace=True)
-X.columns
+
 
 y = data['FTR']
 X = data.drop(columns=['Div','Date','HomeTeam','AwayTeam','FTR','HTR'],axis=1)
 
-################################################# EDA ##################################################################
-
-
-plt.pie(y.value_counts(),autopct='%1.1f%%')
-plt.legend(['Home','Away','Draw'])
-plt.title('Class repartition')
+################################################# Scaling ##############################################################
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+X = pd.DataFrame(scaler.fit_transform(X),columns=X.columns)
+################################################### Feature Importance #################################################
+from sklearn.ensemble import ExtraTreesClassifier
+model = ExtraTreesClassifier(n_estimators=50)
+model.fit(X, y)
+feat_importances = pd.Series(model.feature_importances_, index=X.columns)
+feat_importances = feat_importances.sort_values()
+feat_importances.plot(kind='barh',legend=False,figsize=(12,9))
 plt.show()
+################################################### PCA ################################################################
+from sklearn.decomposition import PCA
+pca = PCA()
+pca.fit(X)
+X = pca.transform(X)
+Cum_explained_Var = np.cumsum(pca.explained_variance_ratio_)
+plt.figure(figsize=(10, 5))
+ax = sns.scatterplot(data=Cum_explained_Var)
+ax.set(xlabel='Dimensions', ylabel='Explained Variance Ratio')
+plt.title("PCA-transformed cumulated variance explained")
+plt.show()
+# from the 30th component, we don't really add information
+X = X[:,:30]
+X.shape
 ############################################### Model Construction #####################################################
 
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -157,7 +184,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import make_scorer, plot_confusion_matrix, classification_report, accuracy_score
+from sklearn.metrics import make_scorer, plot_confusion_matrix, classification_report, accuracy_score, f1_score
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y,test_size=0.25)
 
@@ -204,12 +231,12 @@ def custom_score_fct(y_true,y_pred):
 RPS_score = make_scorer(custom_score_fct,greater_is_better=False,needs_proba=True)
 
 
-def ModelSelection(CrossVal_dict):
+def ModelSelection(CrossVal_dict,score_fct = 'f1_weighted'):
     Best_Classifiers_dict = {}
 
     for clf in CrossVal_dict.keys():
 
-        CV = GridSearchCV(CrossVal_dict[clf]['Classifier'], scoring=RPS_score,
+        CV = GridSearchCV(CrossVal_dict[clf]['Classifier'], scoring=score_fct,
                           param_grid=CrossVal_dict[clf]['Hyperparameter'], cv=5)
         CV = CV.fit(X_train, y_train)
         Best_Classifiers_dict[clf] = {'Classifier': CV.best_estimator_, 'Hyperparameter': CV.best_params_}
@@ -219,12 +246,13 @@ def ModelSelection(CrossVal_dict):
 
 
 Best_Classifiers_dict = ModelSelection(CrossVal_dict)
+Best_Classifiers_dict = ModelSelection(CrossVal_dict,score_fct=RPS_score)
 
 
 ############################################### Tests Results ##########################################################
 
 def DisplayResults(Best_Classifiers_dict,X_test,y_test):
-    Score_Comparison_df = pd.DataFrame(index=Best_Classifiers_dict.keys(),columns=['Accuracy_Score','RPS'])
+    Score_Comparison_df = pd.DataFrame(index=Best_Classifiers_dict.keys(),columns=['F1_weighted_Score','RPS'])
     for clf in Best_Classifiers_dict.keys():
         print('###############################################################')
         plot_confusion_matrix(Best_Classifiers_dict[clf]['Classifier'], X_test, y_test, cmap="YlGnBu",
@@ -236,8 +264,8 @@ def DisplayResults(Best_Classifiers_dict,X_test,y_test):
         print('Rank probability score: {:.2f}'.format(
             RPS_score(Best_Classifiers_dict[clf]['Classifier'], X_test, y_test)))
         print('###############################################################')
-        Score_Comparison_df.loc[clf, 'Accuracy_Score'] = accuracy_score(y_test, Best_Classifiers_dict[clf]['Classifier']
-                                                                       .predict(X_test))
+        Score_Comparison_df.loc[clf, 'F1_weighted_Score'] = f1_score(y_test, Best_Classifiers_dict[clf]['Classifier']
+                                                                       .predict(X_test),average='weighted')
         Score_Comparison_df.loc[clf, 'RPS'] = RPS_score(Best_Classifiers_dict[clf]['Classifier'], X_test, y_test)
 
     Score_Comparison_df.abs().plot.barh(figsize=(8,6),grid=True)
